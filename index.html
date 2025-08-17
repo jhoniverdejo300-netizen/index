@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>¡Sorpresa!</title>
+  <!-- Tipografía diferente -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1: #0f0c29;
+      --bg2: #302b63;
+      --bg3: #24243e;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: "Bebas Neue", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: linear-gradient(120deg, var(--bg1), var(--bg2), var(--bg3));
+      background-size: 300% 300%;
+      animation: gradientShift 12s ease-in-out infinite;
+    }
+
+    /* Capa de brillo sutil */
+    .glow {
+      position: fixed;
+      inset: -20vmax;
+      background: radial-gradient(40vmax 40vmax at var(--x,50%) var(--y,50%), #ffffff0f, transparent 60%);
+      pointer-events: none;
+      filter: blur(10px);
+      mix-blend-mode: screen;
+      transition: 200ms ease;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.5rem, 12vw, 10rem);
+      letter-spacing: 0.04em;
+      color: white;
+      text-align: center;
+      text-shadow: 0 2px 20px rgba(0,0,0,.45), 0 0 2px rgba(255,255,255,.25);
+      opacity: 0;
+      transform: scale(.8) translateY(20px) rotate(-2deg);
+      filter: blur(6px);
+      will-change: transform, opacity, filter;
+    }
+
+    /* Animación de aparición sorpresa */
+    body.show h1 {
+      animation: popIn 900ms cubic-bezier(.2,1.2,.2,1) forwards,
+                 shimmer 2200ms ease-out 1000ms both;
+    }
+
+    /* Cursor para que el usuario pueda repetir la sorpresa */
+    body { cursor: pointer; }
+    .hint {
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+      font: 600 12px/1.2 system-ui, sans-serif; color: #ffffffb0; letter-spacing: .06em;
+      text-transform: uppercase; opacity: .0; transition: opacity .4s ease;
+      pointer-events: none;
+    }
+    body.show .hint { opacity: .9; }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(.7) translateY(30px) rotate(-6deg); filter: blur(12px); }
+      60% { opacity: 1; transform: scale(1.08) translateY(-4px) rotate(1deg); filter: blur(0); }
+      100% { opacity: 1; transform: scale(1) translateY(0) rotate(0); filter: blur(0); }
+    }
+
+    @keyframes shimmer {
+      0% { text-shadow: 0 0 0 rgba(255,255,255,0), 0 0 0 rgba(0,0,0,0.4); }
+      100% { text-shadow: 0 6px 30px rgba(0,0,0,.5), 0 0 40px rgba(255,255,255,.2); }
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <h1 id="msg" aria-live="polite" aria-atomic="true">richi pudrete</h1>
+  <div class="hint">haz clic para repetir</div>
+
+  <script>
+    // Aparición sorpresa con retraso aleatorio
+    function surprise() {
+      document.body.classList.remove('show');
+      // forzar reflow para reiniciar la animación
+      void document.body.offsetWidth;
+      const delay = 700 + Math.random() * 1800; // 0.7s a 2.5s
+      setTimeout(() => document.body.classList.add('show'), delay);
+    }
+
+    // Mueve el resplandor con el puntero
+    const glow = document.querySelector('.glow');
+    window.addEventListener('pointermove', (e) => {
+      const x = (e.clientX / innerWidth) * 100;
+      const y = (e.clientY / innerHeight) * 100;
+      glow.style.setProperty('--x', x + '%');
+      glow.style.setProperty('--y', y + '%');
+    });
+
+    // Repite al hacer clic/tocar
+    window.addEventListener('click', surprise);
+    window.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') surprise(); });
+
+    // Lanzar la primera sorpresa al cargar
+    window.addEventListener('load', surprise);
+  </script>
+</body>
+</html>
